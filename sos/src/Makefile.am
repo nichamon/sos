@@ -47,7 +47,7 @@ sos_part_detach_LDADD = libsos.la
 bin_PROGRAMS += sos_part_detach
 
 sos_part_query_SOURCES = sos_part_query.c
-sos_part_query_LDADD = libsos.la
+sos_part_query_LDADD = libsos.la -luuid
 bin_PROGRAMS += sos_part_query
 
 sos_part_modify_SOURCES = sos_part_modify.c
@@ -55,5 +55,5 @@ sos_part_modify_LDADD = libsos.la
 bin_PROGRAMS += sos_part_modify
 
 sos_part_migrate_SOURCES = sos_part_migrate.c
-sos_part_migrate_LDADD = libsos.la -luuid
+sos_part_migrate_LDADD = ../../ods/src/libods.la libsos.la -luuid
 bin_PROGRAMS += sos_part_migrate
