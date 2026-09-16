@@ -7119,6 +7119,8 @@ cdef class Query:
         if type(columns) != list and type(columns) != tuple:
             raise ValueError("The columns argument must be a list or tuple.")
 
+        print(f"Query.select(): columns={columns}, order_by={order_by}, desc={desc}, where={where}, from_={from_}, unique={unique}")
+
         self.release()
 
         self.unique = unique
@@ -7349,6 +7351,8 @@ cdef class SqlQuery:
         cdef int c_rc
         cdef sos_attr_t c_attr
         cdef int c_col_no
+
+        print(f"SqlQuery.select(): {sql}")
 
         c_rc = dsos_query_select(<dsos_query_t>self.c_query, sql.encode())
         if c_rc != 0:
