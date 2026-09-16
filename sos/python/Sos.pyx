@@ -6784,6 +6784,12 @@ cdef class Query:
         self.col_width = 15
         self.desc = False
 
+        query_log_path = os.getenv("SOS_QUERY_LOG")
+        try:
+            self.query_log = open(query_log_path 'a') if query_log_path else None
+        except:
+            raise RuntimeError(f"Failed to open SOS_QUERY_LOG ({query_log_path})")
+
     cdef __find_schema_with_attr(self, name):
         if len(self.schema) > 0:
             for s in self.schema:
@@ -7119,6 +7125,9 @@ cdef class Query:
         if type(columns) != list and type(columns) != tuple:
             raise ValueError("The columns argument must be a list or tuple.")
 
+        if self.query_log:
+            self.query_log.write(f"Query.select(): columns={columns} order_by={order_by} desc={desc} where={where} from_={from_} unique={unique}\n")
+
         self.release()
 
         self.unique = unique
@@ -7268,6 +7277,10 @@ cdef class Query:
                 return None
         return self.make_row(cursor)
 
+    def __del__(self):
+        if self.query_log:
+            self.query_log.close()
+
 cdef class SqlQuery:
     """The SqlQuery class implements a NoSQL interface to a DSOS
     container. The NoSQL syntax is similar to SQL but does not
@@ -7335,6 +7348,12 @@ cdef class SqlQuery:
         self.c_max_array = max_array
         self.c_res_acc = NULL
         self.c_query = dsos_query_create(<dsos_container_t>self.cont.c_cont)
+
+        query_log_path = os.getenv("SOS_QUERY_LOG")
+        try:
+            self.query_log = open(query_log_path 'a') if query_log_path else None
+        except:
+            raise RuntimeError(f"Failed to open SOS_QUERY_LOG ({query_log_path})")
         if self.c_query == NULL:
             raise ValueError("The query could not be created.")
 
@@ -7349,6 +7368,9 @@ cdef class SqlQuery:
         cdef int c_rc
         cdef sos_attr_t c_attr
         cdef int c_col_no
+
+        if self.query_log:
+            self.query_log.write(f"SqlQeury.select(): {sql}\n")
 
         c_rc = dsos_query_select(<dsos_query_t>self.c_query, sql.encode())
         if c_rc != 0:
@@ -7529,3 +7551,7 @@ cdef class SqlQuery:
 
     def __dealloc__(self):
         free(self.c_res_acc)
+
+    def __del__(self):
+        if self.query_log:
+            self.query_log.close()
